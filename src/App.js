@@ -1,143 +1,72 @@
-import React, { useState } from 'react'; // React와 useState 훅을 가져옵니다.
-import './App.css'; // CSS 파일을 가져옵니다.
-import Groq from 'groq-sdk'; // Groq SDK를 가져옵니다
-import ChatBot from './components/ChatBot/ChatBot'; // ChatBot 컴포넌트를 가져옵니다
-
-// [1] 변수 선언
+import React, { useState } from 'react';
+import './App.css';
 
 function App() {
-  // 상태 변수를 설정합니다.
-  const [activeTab, setActiveTab] = useState('프롬프트 작성'); // 현재 활성화된 탭
+  const [activeTab, setActiveTab] = useState('프롬프트 작성');
   const [promptInputs, setPromptInputs] = useState({ 
     case: '', 
     conflict: '', 
     background: '', 
     solution: '' 
-  }); // 사용자 입력값을 저장하는 상태 변수
-  const [generatedText, setGeneratedText] = useState(''); // 생성된 문장을 저장하는 상태 변수
-  const [songPrompt, setSongPrompt] = useState(''); // 2단계 노래 프롬프트 저장
-  const [referenceSong, setReferenceSong] = useState(''); // 참고할 노래 입력 상태
-  const [selectedRhythm, setSelectedRhythm] = useState('60'); // 선택한 박자 상태
-  const [selectedScale, setSelectedScale] = useState('C'); // 선택한 스케일 상태
-  const [selectedGenre, setSelectedGenre] = useState('POP'); // 선택한 장르 상태
+  });
+  const [generatedText, setGeneratedText] = useState('');
+  
+  // 현재 사용하지 않는 상태들 주석 처리
+  /*
+  const [songPrompt, setSongPrompt] = useState('');
+  const [referenceSong, setReferenceSong] = useState('');
+  const [selectedRhythm, setSelectedRhythm] = useState('60');
+  const [selectedScale, setSelectedScale] = useState('C');
+  const [selectedGenre, setSelectedGenre] = useState('POP');
+  const [apiKey, setApiKey] = useState('');
+  const [isApiKeySet, setIsApiKeySet] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [inputText, setInputText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  */
 
-// 챗봇 관련 상태 변수 추가
-const [apiKey, setApiKey] = useState(''); // API 키 저장
-const [isApiKeySet, setIsApiKeySet] = useState(false); // API 키 설정 여부
-const [messages, setMessages] = useState([]); // 채팅 메시지 저장
-const [inputText, setInputText] = useState(''); // 채팅 입력값
-const [isLoading, setIsLoading] = useState(false); // 로딩 상태
-
-
-
-  // [2] 함수 선언
-  // 사용자 입력 값 업데이트 함수
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setPromptInputs({ ...promptInputs, [name]: value }); // 입력값을 상태에 저장
+    setPromptInputs({ ...promptInputs, [name]: value });
   };
 
-  // 프롬프트 문자열 생성 함수
   const generatePromptString = () => {
     const promptString = `[${promptInputs.case}] 영토 분쟁을 사례로 캠페인 노래를 만들거야. 이 사례는 [${promptInputs.conflict}]이/가 갈등을 겪고 있고, [${promptInputs.background}]이/가 핵심적인 분쟁 배경이야. 해결 방안으로는 [${promptInputs.solution}]이/가 필요해.`;
-    setGeneratedText(promptString); // 생성된 문장을 상태에 저장
-    navigator.clipboard.writeText(promptString); // 클립보드에 복사
+    setGeneratedText(promptString);
+    navigator.clipboard.writeText(promptString);
   };
 
-  // 2단계 노래 프롬프트 생성 함수
+  // 사용하지 않는 함수들 주석 처리
+  /*
   const generateSongPrompt = () => {
     const promptString = `이 노래는 영토 분쟁을 해결에 도움을 주기 위한 캠페인 송이야. 박자는 [${selectedRhythm}]으로 하고, 스케일은 [${selectedScale}] 스케일로 해줘. 장르는 [${selectedGenre}]이고, 참고할 노래는 [${referenceSong}]이야. 이 노래와 비슷한 느낌이 나도록 만들어줘.`;
-    setSongPrompt(promptString); // 생성된 노래 프롬프트를 상태에 저장
+    setSongPrompt(promptString);
   };
 
-    // // 챗봇 관련 함수 추가
-    // const handleApiKeySubmit = (e) => {
-    //   e.preventDefault();
-    //   if (apiKey.trim()) {
-    //     setIsApiKeySet(true);
-    //   }
-    // };
-  
-    // const handleMessageSubmit = async (e) => {
-    //   e.preventDefault();
-    //   if (!inputText.trim()) return;
-  
-    //   const userMessage = {
-    //     role: 'user',
-    //     content: inputText
-    //   };
-  
-    //   setMessages(prev => [...prev, userMessage]);
-    //   setInputText('');
-    //   setIsLoading(true);
-  
-    //   try {
-    //     const groq = new Groq({
-    //       apiKey: apiKey
-    //     });
-  
-    //     const completion = await groq.chat.completions.create({
-    //       messages: [...messages, userMessage],
-    //       model: "llama-3.3-70b-versatile",
-    //       temperature: 0.7,
-    //       max_tokens: 32768,
-    //     });
-  
-    //     const aiResponse = {
-    //       role: 'assistant',
-    //       content: completion.choices[0].message.content
-    //     };
-  
-    //     setMessages(prev => [...prev, aiResponse]);
-    //   } catch (error) {
-    //     console.error('Error:', error);
-    //     setMessages(prev => [...prev, {
-    //       role: 'system',
-    //       content: '에러가 발생했습니다. API 키를 확인해주세요.'
-    //     }]);
-    //     setIsApiKeySet(false);
-    //   } finally {
-    //     setIsLoading(false);
-    //   }
-    // };
-  
-    // const resetChat = () => {
-    //   setMessages([]);
-    //   setIsApiKeySet(false);
-    //   setApiKey('');
-    // };
-  
-    // const handleChatInputChange = (e) => {
-    //   setInputText(e.target.value);
-    // };
-  
-    // 프롬프트 자동 입력 함수
-    const insertPromptToChat = () => {
-      const promptText = `${generatedText}\n\n위 프롬프트를 바탕으로 영토 분쟁 캠페인 송 가사를 작성해줘.\n조건은 다음과 같아.\n1. 분량은 30초, 벌스 1개, 브릿지 1개, 코러스 1개로 만들면 돼.\n2. 벌스는 3줄, 브릿지는 1줄, 코러스는 4줄, 각 줄은 최대 4어절이야.\n3. 가사에 갈등 국가, 분쟁 배경, 해결 방안이 반드시 들어가도록 해줘.`;
-      setInputText(promptText);
-    };
-  
-    // API 키 검증 함수
-    const validateApiKey = async () => {
-      try {
-        const groq = new Groq({
-          apiKey: apiKey
-        });
-        
-        // 간단한 테스트 요청
-        await groq.chat.completions.create({
-          messages: [{ role: 'user', content: 'test' }],
-          model: "llama-3.3-70b-versatile",
-          max_tokens: 10,
-        });
-        
-        return true;
-      } catch (error) {
-        console.error('API Key validation failed:', error);
-        return false;
-      }
-    };
+  const insertPromptToChat = () => {
+    const promptText = `${generatedText}\n\n위 프롬프트를 바탕으로 영토 분쟁 캠페인 송 가사를 작성해줘.\n조건은 다음과 같아.\n1. 분량은 30초, 벌스 1개, 브릿지 1개, 코러스 1개로 만들면 돼.\n2. 벌스는 3줄, 브릿지는 1줄, 코러스는 4줄, 각 줄은 최대 4어절이야.\n3. 가사에 갈등 국가, 분쟁 배경, 해결 방안이 반드시 들어가도록 해줘.`;
+    setInputText(promptText);
+  };
 
+  const validateApiKey = async () => {
+    try {
+      const groq = new Groq({
+        apiKey: apiKey
+      });
+      
+      await groq.chat.completions.create({
+        messages: [{ role: 'user', content: 'test' }],
+        model: "llama-3.3-70b-versatile",
+        max_tokens: 10,
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('API Key validation failed:', error);
+      return false;
+    }
+  };
+  */
 
   // [3] 홈페이지 구조
 
@@ -229,13 +158,6 @@ const [isLoading, setIsLoading] = useState(false); // 로딩 상태
           <a href="https://gemini.google.com/app?hl=ko" target="_blank" rel="noopener noreferrer" className="link-box">
             가사 만들기<br />페이지로 이동
           </a>
-
-            {/* 챗봇 섹션 추가 */}
-          <div className="divider">또는</div>
-          <div className="chatbot-section">
-          <h3>AI와 가사 만들기</h3>
-          <ChatBot />
-          </div>
 
           {/* API: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 */}
         </div>
