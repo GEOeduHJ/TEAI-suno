@@ -50,66 +50,66 @@ const [isLoading, setIsLoading] = useState(false); // 로딩 상태
     setSongPrompt(promptString); // 생성된 노래 프롬프트를 상태에 저장
   };
 
-    // 챗봇 관련 함수 추가
-    const handleApiKeySubmit = (e) => {
-      e.preventDefault();
-      if (apiKey.trim()) {
-        setIsApiKeySet(true);
-      }
-    };
+    // // 챗봇 관련 함수 추가
+    // const handleApiKeySubmit = (e) => {
+    //   e.preventDefault();
+    //   if (apiKey.trim()) {
+    //     setIsApiKeySet(true);
+    //   }
+    // };
   
-    const handleMessageSubmit = async (e) => {
-      e.preventDefault();
-      if (!inputText.trim()) return;
+    // const handleMessageSubmit = async (e) => {
+    //   e.preventDefault();
+    //   if (!inputText.trim()) return;
   
-      const userMessage = {
-        role: 'user',
-        content: inputText
-      };
+    //   const userMessage = {
+    //     role: 'user',
+    //     content: inputText
+    //   };
   
-      setMessages(prev => [...prev, userMessage]);
-      setInputText('');
-      setIsLoading(true);
+    //   setMessages(prev => [...prev, userMessage]);
+    //   setInputText('');
+    //   setIsLoading(true);
   
-      try {
-        const groq = new Groq({
-          apiKey: apiKey
-        });
+    //   try {
+    //     const groq = new Groq({
+    //       apiKey: apiKey
+    //     });
   
-        const completion = await groq.chat.completions.create({
-          messages: [...messages, userMessage],
-          model: "llama-3.3-70b-versatile",
-          temperature: 0.7,
-          max_tokens: 32768,
-        });
+    //     const completion = await groq.chat.completions.create({
+    //       messages: [...messages, userMessage],
+    //       model: "llama-3.3-70b-versatile",
+    //       temperature: 0.7,
+    //       max_tokens: 32768,
+    //     });
   
-        const aiResponse = {
-          role: 'assistant',
-          content: completion.choices[0].message.content
-        };
+    //     const aiResponse = {
+    //       role: 'assistant',
+    //       content: completion.choices[0].message.content
+    //     };
   
-        setMessages(prev => [...prev, aiResponse]);
-      } catch (error) {
-        console.error('Error:', error);
-        setMessages(prev => [...prev, {
-          role: 'system',
-          content: '에러가 발생했습니다. API 키를 확인해주세요.'
-        }]);
-        setIsApiKeySet(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    //     setMessages(prev => [...prev, aiResponse]);
+    //   } catch (error) {
+    //     console.error('Error:', error);
+    //     setMessages(prev => [...prev, {
+    //       role: 'system',
+    //       content: '에러가 발생했습니다. API 키를 확인해주세요.'
+    //     }]);
+    //     setIsApiKeySet(false);
+    //   } finally {
+    //     setIsLoading(false);
+    //   }
+    // };
   
-    const resetChat = () => {
-      setMessages([]);
-      setIsApiKeySet(false);
-      setApiKey('');
-    };
+    // const resetChat = () => {
+    //   setMessages([]);
+    //   setIsApiKeySet(false);
+    //   setApiKey('');
+    // };
   
-    const handleChatInputChange = (e) => {
-      setInputText(e.target.value);
-    };
+    // const handleChatInputChange = (e) => {
+    //   setInputText(e.target.value);
+    // };
   
     // 프롬프트 자동 입력 함수
     const insertPromptToChat = () => {
